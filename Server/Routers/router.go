@@ -1,8 +1,10 @@
 package Routers
 
 import (
-	"github.com/Lucasmartinsn/grocery-api/Server/Middlewares"
 	"github.com/gin-gonic/gin"
+
+	employee "github.com/Lucasmartinsn/grocery-api/Handles/Employee"
+	"github.com/Lucasmartinsn/grocery-api/Server/Middlewares"
 )
 
 func ConfigRoutes(router *gin.Engine) *gin.Engine {
@@ -10,9 +12,12 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 	router.Use(gin.Recovery())
 	main := router.Group("api")
 	{
-		Login := main.Group("auth")
+		Employee := main.Group("employee", Middlewares.Auth())
 		{
-			Login.POST("/",)
+			Employee.GET("/", employee.EmployeeList)
+			Employee.POST("/", employee.EmployeeCreate)
+			Employee.PUT("/:id", employee.EmployeeUpdate)
+			Employee.DELETE("/:id", employee.EmployeeDelete)
 		}
 	}
 	return router
