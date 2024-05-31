@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	models "github.com/Lucasmartinsn/grocery-api/Models/Employee"
+	"github.com/Lucasmartinsn/grocery-api/Services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -14,7 +15,7 @@ func EmployeeCreate(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error decoding json",
+			"Message": "error decoding json",
 		})
 		return
 	}
@@ -23,12 +24,12 @@ func EmployeeCreate(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":    err.Error(),
-			"menssage": "error when trying to insert",
+			"Message": "error when trying to insert",
 		})
 
 	} else {
 		c.JSON(201, gin.H{
-			"menssage": "registered successfully",
+			"Message": "registered successfully",
 		})
 	}
 }
@@ -38,11 +39,11 @@ func EmployeeUpdate(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error when parsing the id",
+			"Message": "error when parsing the id",
 		})
 		return
 	}
-	keys := []string{"pass", "name", "office", "active", "admin"}
+	keys := []string{"all", "pass", "name", "office", "active", "admin"}
 	params := make(map[string]bool)
 	for _, key := range keys {
 		params[key] = false
@@ -51,7 +52,7 @@ func EmployeeUpdate(c *gin.Context) {
 	for _, key := range keys {
 		valueStr := c.Query(key)
 		if valueStr != "" {
-			// Converter string para bool
+			// convert string to bool
 			valueBool, err := strconv.ParseBool(valueStr)
 			if err != nil {
 				continue
@@ -65,7 +66,7 @@ func EmployeeUpdate(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error decoding json",
+			"Message": "error decoding json",
 		})
 		return
 	}
@@ -74,7 +75,7 @@ func EmployeeUpdate(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error updating register",
+			"Message": "error updating register",
 		})
 		return
 	}
@@ -95,28 +96,13 @@ func EmployeeUpdate(c *gin.Context) {
 		})
 	} else {
 		c.JSON(200, gin.H{
-			"Mensage": "registration updated successfully",
+			"Message": "registration updated successfully",
 		})
 	}
 }
 
 func EmployeeList(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(400, gin.H{
-			"Error":   err.Error(),
-			"Mensage": "error when parsing the id",
-		})
-		return
-	}
-	status, err := strconv.ParseBool(c.Query("status"))
-	if err != nil {
-		c.JSON(400, gin.H{
-			"Error": "error when converting string to bool",
-		})
-	}
-
-	resp, err := models.SearchEmployees(id, status)
+	resp, err := models.SearchEmployees(c.Query("id"), c.Query("status"))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error": err.Error(),
@@ -133,7 +119,7 @@ func EmployeeDelete(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error when parsing the id",
+			"Message": "error when parsing the id",
 		})
 		return
 	}
@@ -142,7 +128,7 @@ func EmployeeDelete(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
-			"Mensage": "error deleted register",
+			"Message": "error deleted register",
 		})
 		return
 	}
@@ -162,7 +148,40 @@ func EmployeeDelete(c *gin.Context) {
 		})
 	} else {
 		c.JSON(200, gin.H{
-			"Mensage": "registration deleted successfully",
+			"Message": "registration deleted successfully",
+		})
+	}
+}
+
+func ValidateLogin(c *gin.Context) {
+	var login models.Employee
+	err := c.ShouldBindJSON(&login)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"Error":   err.Error(),
+			"Message": "error when decoding json",
+		})
+		return
+	}
+
+	register, err := models.Validate(login.Cpf, login.Password)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"Error": err.Error(),
+		})
+		return
+	}
+
+	token, err := Services.NewJWTService().GenerateToken(register.Id)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"Error":   err.Error(),
+			"Message": "token not generated! return null data",
+		})
+		return
+	} else {
+		c.JSON(200, gin.H{
+			"token": token,
 		})
 	}
 }

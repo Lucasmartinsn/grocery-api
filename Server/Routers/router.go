@@ -12,6 +12,10 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 	router.Use(gin.Recovery())
 	main := router.Group("api")
 	{
+		Login := main.Group("")
+		{
+			Login.POST("employee/login", employee.ValidateLogin)
+		}
 		Employee := main.Group("employee", Middlewares.Auth())
 		{
 			Employee.GET("/", employee.EmployeeList)
