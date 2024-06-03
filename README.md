@@ -17,6 +17,9 @@ The API will manage the basic functionalities of a supermarket.
     ```
 ### Employee  
 ``Login employee ``
+
+The ID is the field ID from the t_employee table
+
  * Url: http://localhost:5000/api/employee/login
  * Method: POST
  * Body
@@ -78,7 +81,7 @@ To search for employees, we have several routes.
     }
     ```
  ``Delete employee registration``
- * Url: http://localhost:5000/api/employee/767567
+ * Url: http://localhost:5000/api/employee/ID
  * Method: DELETE
  * Body
    ```json
@@ -95,7 +98,7 @@ To search for employees, we have several routes.
 
 To update for employees, we have several routes. 
 * Update all employee fields
-    *  Url: http://localhost:5000/api/employee/id?all=true
+    *  Url: http://localhost:5000/api/employee/ID?all=true
         * Method: PUT
         * Body
             ```json
@@ -108,7 +111,7 @@ To update for employees, we have several routes.
             } 
             ```
 * Update one employee field
-    *  Url: http://localhost:5000/api/employee/id?pass=true
+    *  Url: http://localhost:5000/api/employee/ID?pass=true
         * Method: PUT
         * Body
             ```json
@@ -117,7 +120,7 @@ To update for employees, we have several routes.
             } 
             ```
 * Update one employee field
-    *  Url: http://localhost:5000/api/employee/id?name=true
+    *  Url: http://localhost:5000/api/employee/ID?name=true
         * Method: PUT
         * Body
             ```json
@@ -126,7 +129,7 @@ To update for employees, we have several routes.
             } 
             ```
 * Update one employee field
-    *  Url: http://localhost:5000/api/employee/id?office=true
+    *  Url: http://localhost:5000/api/employee/ID?office=true
         * Method: PUT
         * Body
             ```json
@@ -135,7 +138,7 @@ To update for employees, we have several routes.
             } 
             ```
 * Update one employee field
-    *  Url: http://localhost:5000/api/employee/id?active=true
+    *  Url: http://localhost:5000/api/employee/ID?active=true
         * Method: PUT
         * Body
             ```json
@@ -144,7 +147,7 @@ To update for employees, we have several routes.
             } 
             ```
 * Update one employee field
-    *  Url: http://localhost:5000/api/employee/id?admin=true
+    *  Url: http://localhost:5000/api/employee/ID?admin=true
         * Method: PUT
         * Body
             ```json
