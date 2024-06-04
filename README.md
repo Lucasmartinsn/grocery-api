@@ -110,7 +110,7 @@ To update for employees, we have several routes.
                 "admin": true,
             } 
             ```
-* Update one employee field
+* Update one employee passaword field
     *  Url: http://localhost:5000/api/employee/ID?pass=true
         * Method: PUT
         * Body
@@ -119,7 +119,7 @@ To update for employees, we have several routes.
                 "password": "123"
             } 
             ```
-* Update one employee field
+* Update one employee name field
     *  Url: http://localhost:5000/api/employee/ID?name=true
         * Method: PUT
         * Body
@@ -128,7 +128,7 @@ To update for employees, we have several routes.
                 "name": "admin"
             } 
             ```
-* Update one employee field
+* Update one employee office field
     *  Url: http://localhost:5000/api/employee/ID?office=true
         * Method: PUT
         * Body
@@ -137,7 +137,7 @@ To update for employees, we have several routes.
                 "office": "ceo"
             } 
             ```
-* Update one employee field
+* Update one employee active field
     *  Url: http://localhost:5000/api/employee/ID?active=true
         * Method: PUT
         * Body
@@ -146,7 +146,7 @@ To update for employees, we have several routes.
                 "active": true
             } 
             ```
-* Update one employee field
+* Update the employee admin field
     *  Url: http://localhost:5000/api/employee/ID?admin=true
         * Method: PUT
         * Body
