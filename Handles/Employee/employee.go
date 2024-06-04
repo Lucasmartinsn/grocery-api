@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	models "github.com/Lucasmartinsn/grocery-api/Models/Employee"
-	"github.com/Lucasmartinsn/grocery-api/Services"
+	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionToken"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -172,7 +172,7 @@ func ValidateLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := Services.NewJWTService().GenerateToken(register.Id)
+	token, err := Services.NewJWTService_Default().GenerateToken_Default(register.Id)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"Error":   err.Error(),

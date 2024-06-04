@@ -17,14 +17,14 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 		{
 			Login.POST("employee/login", employee.ValidateLogin)
 		}
-		Employee := main.Group("employee", Middlewares.Auth())
+		Employee := main.Group("employee", Middlewares.Auth_default())
 		{
 			Employee.GET("/", employee.EmployeeList)
 			Employee.POST("/", employee.EmployeeCreate)
 			Employee.PUT("/:id", employee.EmployeeUpdate)
 			Employee.DELETE("/:id", employee.EmployeeDelete)
 		}
-		Supplier := main.Group("supplier", Middlewares.Auth())
+		Supplier := main.Group("supplier", Middlewares.Auth_default())
 		{
 			Supplier.GET("/", supllier.SupplierList)
 			Supplier.GET("/product/:id", supllier.SupplierListProduct)

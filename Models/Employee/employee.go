@@ -6,13 +6,13 @@ import (
 	"strconv"
 
 	"github.com/Lucasmartinsn/grocery-api/Database"
-	"github.com/Lucasmartinsn/grocery-api/Services"
+	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionPass"
 	"github.com/google/uuid"
 )
 
 func isUUIDEmpty(u uuid.UUID) bool {
 	// uuid.Nil == Null
-	return u == uuid.Nil 
+	return u == uuid.Nil
 }
 
 func SearchEmployees(i, s string) ([]Employee, error) {
@@ -23,8 +23,8 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 	defer conn.Close()
 
 	id, _ := uuid.Parse(i)
-	status, _:= strconv.ParseBool(s)
-	if i == "" && s == ""  {
+	status, _ := strconv.ParseBool(s)
+	if i == "" && s == "" {
 		// Resquest: http://localhost:5000/api/employee/
 		var employee []Employee
 		rows, err := conn.Query(`SELECT * FROM t_employee`)
@@ -42,7 +42,7 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		}
 		return employee, err
 
-	} else if !isUUIDEmpty(id) && s == ""{
+	} else if !isUUIDEmpty(id) && s == "" {
 		// Get One
 		// Resquest: http://localhost:5000/api/employee/?id=2342
 		var employee Employee
@@ -51,7 +51,7 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 
 		return []Employee{employee}, err
 
-	} else if i == "" && s != ""{
+	} else if i == "" && s != "" {
 		// Get all when tag !empty
 		// Resquest: http://localhost:5000/api/employee/?status=true
 		var employee []Employee
@@ -89,12 +89,12 @@ func UpdateEmployee(id uuid.UUID, option map[string]bool, employee Employee) (in
 		return 0, err
 	}
 	defer conn.Close()
-	
+
 	if option["all"] {
 		// Resquest: http://localhost:5000/api/employee/2342?all=true
-		password,_ := Services.HashPassword(employee.Password)
+		password, _ := Services.HashPassword(employee.Password)
 		row, err := conn.Exec(
-			`UPDATE t_employee SET name=$2, password=$3, office=$4, active=$5, admin=$6 WHERE id=$1`, id, 
+			`UPDATE t_employee SET name=$2, password=$3, office=$4, active=$5, admin=$6 WHERE id=$1`, id,
 			employee.Name, password, employee.Office, employee.Active, employee.Admin)
 		if err != nil {
 			return 0, err
@@ -103,7 +103,7 @@ func UpdateEmployee(id uuid.UUID, option map[string]bool, employee Employee) (in
 
 	} else if option["pass"] {
 		// Resquest: http://localhost:5000/api/employee/2342?pass=true
-		password,_ := Services.HashPassword(employee.Password)
+		password, _ := Services.HashPassword(employee.Password)
 		row, err := conn.Exec(`UPDATE t_employee SET password=$2 WHERE id=$1`, id, password)
 		if err != nil {
 			return 0, err
@@ -191,7 +191,7 @@ func Validate(cpf int, senha string) (employee Employee, err error) {
 		return
 	}
 	defer conn.Close()
-	
+
 	query := `SELECT id, password, active FROM t_employee WHERE cpf=$1`
 	err = conn.QueryRow(query, cpf).Scan(&employee.Id, &employee.Password, &employee.Active)
 	if err != nil {

@@ -1,4 +1,4 @@
-package Services
+package Encryptionpass
 
 import (
 	"golang.org/x/crypto/bcrypt"

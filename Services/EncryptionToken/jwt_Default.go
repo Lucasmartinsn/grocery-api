@@ -1,4 +1,4 @@
-package Services
+package Encryptiontoken
 
 import (
 	"fmt"
@@ -9,25 +9,25 @@ import (
 	"github.com/google/uuid"
 )
 
-type JWTService struct {
+type JWTService_Default struct {
 	secretKey string
 	issuer    string
 }
 
-func NewJWTService() *JWTService {
-	return &JWTService{
-		secretKey: os.Getenv("JWT_SECRET_KEY"),
-		issuer:    os.Getenv("JWT_ISSUER"),
+func NewJWTService_Default() *JWTService_Default {
+	return &JWTService_Default{
+		secretKey: os.Getenv("JWT_SECRET_KEY_DEFAULT"),
+		issuer:    os.Getenv("JWT_ISSUER_DEFAULT"),
 	}
 }
 
-type Claims struct {
+type Claims_Default struct {
 	UserID uuid.UUID `json:"userId"`
 	jwt.StandardClaims
 }
 
-func (s *JWTService) GenerateToken(userID uuid.UUID) (string, error) {
-	claims := &Claims{
+func (s *JWTService_Default) GenerateToken_Default(userID uuid.UUID) (string, error) {
+	claims := &Claims_Default{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 3).Unix(), // Token expiration time
@@ -46,7 +46,7 @@ func (s *JWTService) GenerateToken(userID uuid.UUID) (string, error) {
 	return tokenString, nil
 }
 
-func (s *JWTService) ValidateToken(tokenString string) (bool, error) {
+func (s *JWTService_Default) ValidateToken_Default(tokenString string) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, isValid := t.Method.(*jwt.SigningMethodHMAC); !isValid {
 			return nil, fmt.Errorf("invalid token: %v", tokenString)
