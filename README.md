@@ -22,7 +22,7 @@ The ID is the field ID from the t_employee table
 
  * Url: http://localhost:5000/api/employee/login
  * Method: POST
- * Body
+ * Body:
    ```json
         {
             "cpf": 99999999999,
@@ -69,7 +69,7 @@ To search for employees, we have several routes.
 ``Create employee ``
  * Url: http://localhost:5000/api/employee/
  * Method: POST
- * Body
+ * Body:
    ```json
     {
         "name":"admin",
@@ -83,7 +83,7 @@ To search for employees, we have several routes.
  ``Delete employee registration``
  * Url: http://localhost:5000/api/employee/ID
  * Method: DELETE
- * Body
+ * Body:
    ```json
     {
         "name":"admin",
@@ -100,7 +100,7 @@ To update for employees, we have several routes.
 * Update all employee fields
     *  Url: http://localhost:5000/api/employee/ID?all=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "name": "admin",
@@ -113,7 +113,7 @@ To update for employees, we have several routes.
 * Update one employee passaword field
     *  Url: http://localhost:5000/api/employee/ID?pass=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "password": "123"
@@ -122,7 +122,7 @@ To update for employees, we have several routes.
 * Update one employee name field
     *  Url: http://localhost:5000/api/employee/ID?name=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "name": "admin"
@@ -131,7 +131,7 @@ To update for employees, we have several routes.
 * Update one employee office field
     *  Url: http://localhost:5000/api/employee/ID?office=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "office": "ceo"
@@ -140,7 +140,7 @@ To update for employees, we have several routes.
 * Update one employee active field
     *  Url: http://localhost:5000/api/employee/ID?active=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "active": true
@@ -149,7 +149,7 @@ To update for employees, we have several routes.
 * Update the employee admin field
     *  Url: http://localhost:5000/api/employee/ID?admin=true
         * Method: PUT
-        * Body
+        * Body:
             ```json
             {
                 "admin": true
@@ -231,7 +231,7 @@ To update for employees, we have several routes.
 ``Create supplier ``
 * Url: http://localhost:5000/api/supplier/?supplier=true
 * Method: POST
-* Body
+* Body:
    ```json
     {
         "name": "supplier name",
@@ -244,7 +244,7 @@ To update for employees, we have several routes.
 ``Create batch from a supplier ``
 * Url: http://localhost:5000/api/supplier/?batch=true
 * Method: POST
-* Body
+* Body:
    ```json
     {
         "supplier_id": "e5c4a8f4-c55a-4dbd-b706-ef1759a38f50",
@@ -256,7 +256,7 @@ To update for employees, we have several routes.
 ``Create product from a supplier ``
 * Url: http://localhost:5000/api/supplier/?product=true
 * Method: POST
-* Body
+* Body:
    ```json
     {
         "batch_id":"4d5e4d6f-2721-42b1-9dba-966c2413e10b",
@@ -270,7 +270,7 @@ To update for employees, we have several routes.
 ``Update a vendor's product``
 * Url: http://localhost:5000/api/supplier/ID?product=true
 * Method: PUT
-* Body
+* Body:
    ```json
     {
         "name":"chease",
@@ -281,7 +281,7 @@ To update for employees, we have several routes.
 ``Update product volume from a supplier ``
 * Url: http://localhost:5000/api/supplier/ID?product=true&volume=true
 * Method: PUT
-* Body
+* Body:
    ```json
     {
         "volume":500
@@ -290,7 +290,7 @@ To update for employees, we have several routes.
 ``update supplier data``
 * Url: http://localhost:5000/api/supplier/ID?supplier=true
 * Method: PUT
-* Body
+* Body:
    ```json
     {
         "name": "supplier name",
@@ -303,7 +303,7 @@ To update for employees, we have several routes.
 ``update batch data from a supplier``
 * Url: http://localhost:5000/api/supplier/ID?batch=true
 * Method: PUT
-* Body
+* Body:
    ```json
     {
         "volume": 520,
@@ -311,3 +311,225 @@ To update for employees, we have several routes.
         "delivery_date":"2024-06-30T09:30:30Z"
     }
     ```
+### Customer
+In customer routes, we use a new token and new encryption to save passwords.
+Token submission remains the same as for other routes, but the client token is only accepted on client routes, and so on.
+
+``Login Customer``
+* Url: http://localhost:5000/api/customer/login/
+* Method: POST
+* Body:
+   ```json
+    {
+        "cpf":1234,
+        "password":"123"
+    }
+    ```
+* Resoonse
+    ```json
+    {
+        "token":"hjksadjahdbmnzbcyudy...."
+    } 
+    ```
+``Login Employee``
+* Url: http://localhost:5000/api/employee/login/customer
+* Method: POST
+* Body:
+   ```json
+    {
+        "cpf":1234,
+        "password":"123"
+    }
+    ```
+* Resoonse
+    ```json
+    {
+        "token":"hjksadjahdbmnzbcyudy...."
+    } 
+    ```
+
+``Search Customer``
+* This route will return all Customer records
+    * Url: http://localhost:5000/api/customer/
+    * Method: GET
+    * Response
+        ```json
+        {
+            "customer": [
+                {
+                    "id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                    "name": "teste",
+                    "email": "teste@gmail",
+                    "contact": 1234,
+                    "cpf": 1234,
+                    "creation_date": "2024-06-04T17:59:17.573315Z"
+                }
+            ]
+        } 
+        ``` 
+* This route will return one Customer record
+    * Url: http://localhost:5000/api/customer/?id=ID
+    * Method: GET
+    * Response
+        ```json
+        {
+            "customer": [
+                {
+                    "id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                    "name": "teste",
+                    "email": "teste@gmail",
+                    "contact": 1234,
+                    "cpf": 1234,
+                    "creation_date": "2024-06-04T17:59:17.573315Z"
+                }
+            ]
+        } 
+        ``` 
+* This route will return all address linked to a Customer, in the url insert the customer's ID
+    * Url: http://localhost:5000/api/customer/address/ID
+    * Method: GET
+    * Response
+        ```json
+        {
+            "Customer": {
+                "id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                "name": "",
+                "email": "lucas@gmail",
+                "contact": 1234,
+                "cpf": 1234,
+                "password": "",
+                "creation_date": "2024-06-04T17:59:17.573315Z"
+            },
+            "Address": [
+                {
+                    "id": "6a684036-ae25-4341-9d0a-235ff4247a3c",
+                    "customer_id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                    "street": "",
+                    "block": "angel",
+                    "number": 234,
+                    "state": "EUA"
+                }
+            ]
+        }
+        ``` 
+* This route will return all Credit cards linked to a Customer, in the url insert the customer's ID
+    * Url: http://localhost:5000/api/customer/card/ID
+    * Method: GET
+    * Response
+        ```json
+        {
+            "Customer": {
+                "id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                "name": "",
+                "email": "lucas@gmail",
+                "contact": 1234,
+                "cpf": 1234,
+                "password": "",
+                "creation_date": "2024-06-04T17:59:17.573315Z"
+            },
+            "Cards": [
+                {
+                    "id": "7059579e-b022-4e9d-95af-d1b454fce9ef",
+                    "customer_id": "d80373f6-8f4b-40bf-9e04-eb140163fc53",
+                    "number": 12343,
+                    "csv": 133,
+                    "name_card": "teste card",
+                    "validity": "08/34"
+                }
+            ]
+        }
+        ```  
+``Create Customer ``
+* Url: http://localhost:5000/api/customer/?customer=true
+* Method: POST
+* Body:
+   ```json
+    {
+        "name":"teste",
+        "email":"teste@gmail",
+        "contact":1234,
+        "cpf":123,
+        "password":"123"
+    }
+    ```
+``Create batch from a supplier ``
+* Url: http://localhost:5000/api/customer/?address=true
+* Method: POST
+* Body:
+   ```json
+    {
+        "customer_id":"3f122513-757d-4ba0-b4dd-4f375b1344d9",
+        "street":"street nine",
+        "block":"angel",
+        "number":234,
+        "state":"EUA"
+    }
+    ```
+``Create batch from a supplier ``
+* Url: http://localhost:5000/api/customer/?card=true
+* Method: POST
+* Body:
+   ```json
+    {
+        "customer_id":"3f122513-757d-4ba0-b4dd-4f375b1344d9",
+        "number":12345,
+        "csv":123,
+        "name_card":"lucas card",
+        "validity":"08/31"
+    }
+    ```
+``Update Customer registration`` 
+
+To update for customers, we have several routes. The ID is the id field from the t_customer table
+* Update all customer fields
+    *  Url: http://localhost:5000/api/customer/ID?customer=true
+    * Method: PUT
+    * Body:
+        ```json
+        {
+            "name":"teste",
+            "email":"teste@gmail",
+            "contact":121233,
+            "cpf":123
+        } 
+        ```
+* Update one customer passaword field
+    * Url: http://localhost:5000/api/customer/ID?customer=true&pass=true
+    * Method: PUT
+    * Body:
+        ```json
+        {
+            "password": "123"
+        } 
+        ```
+To update to the customer address. The ID is the id field from the t_address table
+* Update all address fields
+    * Url: http://localhost:5000/api/customer/ID?address=true
+    * Method: PUT
+    * Body:
+        ```json
+        {
+            "street":"teste",
+            "block":"teste",
+            "number":23,
+            "state":"EUA"
+        } 
+        ```
+To update to the customer card. The ID is the id field from the t_credit_card table
+* Update all address fields
+    * Url: http://localhost:5000/api/customer/ID?card=true
+    * Method: PUT
+    * Body:
+        ```json
+        {
+            "number":12343,
+            "csv":133,
+            "name_card":"teste card",
+            "validity":"08/34"
+        } 
+        ```
+``Delete Customer``
+
+To update for customers, we have several routes. The ID is the id field from the t_customer table
+* Url: http://localhost:5000/api/customer/ID
+* Method: DELETE
