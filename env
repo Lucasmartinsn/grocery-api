@@ -1,0 +1,29 @@
+# Configs of Databases
+DATABASES_HOST=
+DATABASES_DB=
+DATABASES_PASS=
+DATABASES_PORT=
+DATABASES_USER=
+# This config is for PosgreSQL, caso you change for MySQL drive use 'mysql'
+DATABASES_DRIVER=postgres
+
+# Config of model GIN
+# Model gin is used to define the number of application logs, can you change this to 'test','release' and null
+# MODEL_GIN=release
+MODEL_GIN= 
+
+# Configure the cryptographic key JWT_SERVICE_CUSTOMER
+# JWT_SECRET_KEY_CUSTOMER=your password
+# JWT_ISSUER_CUSTOMER=your user
+JWT_SECRET_KEY_CUSTOMER=
+JWT_ISSUER_CUSTOMER=
+
+# Configure the cryptographic key JWT_SERVICE_DEFAULT
+# JWT_SECRET_KEY_DEFAULT=your password
+# JWT_ISSUER_DEFAULT=your user
+JWT_SECRET_KEY_DEFAULT=
+JWT_ISSUER_DEFAULT=
+
+
+# Configure the cryptographic key AES. The key must 32 bytes
+AES_SECRET_KEY=A0lWc&|=p8zMzW>U1-j%$48auQa1U5T&ç6 # not used
