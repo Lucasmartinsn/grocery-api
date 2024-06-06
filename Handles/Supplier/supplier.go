@@ -1,12 +1,19 @@
 package Supplier
 
 import (
+	"encoding/json"
 	"strconv"
 
+	key "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	models "github.com/Lucasmartinsn/grocery-api/Models/Supplier"
+	descrypt "github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+var requestData struct {
+	Data string `json:"data"`
+}
 
 func SupplierCreate(c *gin.Context) {
 	keys := []string{"supplier", "product", "batch"}
@@ -26,11 +33,26 @@ func SupplierCreate(c *gin.Context) {
 		}
 	}
 	if params["supplier"] {
-		var data models.Supplier
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
+			})
+			return
+		}
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data models.Supplier
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
 			})
 			return
 		}
@@ -47,11 +69,26 @@ func SupplierCreate(c *gin.Context) {
 			return
 		}
 	} else if params["product"] {
-		var data models.Product
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
+			})
+			return
+		}
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data models.Product
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
 			})
 			return
 		}
@@ -68,11 +105,26 @@ func SupplierCreate(c *gin.Context) {
 			return
 		}
 	} else if params["batch"] {
-		var data models.Batch
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
+			})
+			return
+		}
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data models.Batch
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
 			})
 			return
 		}
@@ -170,24 +222,36 @@ func SupplierUpdate(c *gin.Context) {
 		}
 	}
 	if params["supplier"] {
-		var supplier models.Supplier
-		err = c.ShouldBindJSON(&supplier)
-		if err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		row, err := models.UpdatedSupplier(id, supplier)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var supplier models.Supplier
+		if err = json.Unmarshal([]byte(decryptedData), &supplier); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		if row, err := models.UpdatedSupplier(id, supplier); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})
@@ -199,25 +263,37 @@ func SupplierUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["product"] {
-		var product models.Product
-		err = c.ShouldBindJSON(&product)
-		if err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		valueBool, _ := strconv.ParseBool(c.Query("volume"))
-		row, err := models.UpdatedProduct(id, product,valueBool)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var product models.Product
+		if err = json.Unmarshal([]byte(decryptedData), &product); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		valueBool, _ := strconv.ParseBool(c.Query("volume"))
+		if row, err := models.UpdatedProduct(id, product, valueBool); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})
@@ -229,24 +305,36 @@ func SupplierUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["batch"] {
-		var batch models.Batch
-		err = c.ShouldBindJSON(&batch)
-		if err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		row, err := models.UpdatedBatch(id, batch)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var batch models.Batch
+		if err = json.Unmarshal([]byte(decryptedData), &batch); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		if row, err := models.UpdatedBatch(id, batch); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})

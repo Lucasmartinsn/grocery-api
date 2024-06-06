@@ -1,29 +1,48 @@
 package Employee
 
 import (
+	"encoding/json"
 	"strconv"
 
+	key "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	models "github.com/Lucasmartinsn/grocery-api/Models/Employee"
+	descrypt "github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionToken"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
+var requestData struct {
+	Data string `json:"data"`
+}
+
 func EmployeeCreate(c *gin.Context) {
-	var employee models.Employee
-	err := c.ShouldBindJSON(&employee)
-	if err != nil {
+	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error decoding json",
 		})
 		return
 	}
-
-	err = models.CreationEmployee(employee)
+	decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 	if err != nil {
 		c.JSON(400, gin.H{
-			"Error":    err.Error(),
+			"Error":   err.Error(),
+			"Message": "error decrypting data",
+		})
+		return
+	}
+	var employee models.Employee
+	if err = json.Unmarshal([]byte(decryptedData), &employee); err != nil {
+		c.JSON(400, gin.H{
+			"Error":   err.Error(),
+			"Message": "error decoding decrypted json",
+		})
+		return
+	}
+	if err = models.CreationEmployee(employee); err != nil {
+		c.JSON(400, gin.H{
+			"Error":   err.Error(),
 			"Message": "error when trying to insert",
 		})
 
@@ -33,7 +52,6 @@ func EmployeeCreate(c *gin.Context) {
 		})
 	}
 }
-
 func EmployeeUpdate(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -60,27 +78,37 @@ func EmployeeUpdate(c *gin.Context) {
 			params[key] = valueBool
 		}
 	}
-
-	var employee models.Employee
-	err = c.ShouldBindJSON(&employee)
-	if err != nil {
+	if err = c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error decoding json",
 		})
 		return
 	}
-
-	row, err := models.UpdateEmployee(id, params, employee)
+	decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 	if err != nil {
+		c.JSON(400, gin.H{
+			"Error":   err.Error(),
+			"Message": "error decrypting data",
+		})
+		return
+	}
+	var employee models.Employee
+	if err = json.Unmarshal([]byte(decryptedData), &employee); err != nil {
+		c.JSON(400, gin.H{
+			"Error":   err.Error(),
+			"Message": "error decoding decrypted json",
+		})
+		return
+	}
+
+	if row, err := models.UpdateEmployee(id, params, employee); err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error updating register",
 		})
 		return
-	}
-
-	if row == 0 {
+	} else if row == 0 {
 		c.JSON(500, gin.H{
 			"Error": "internal database error",
 		})
@@ -100,7 +128,6 @@ func EmployeeUpdate(c *gin.Context) {
 		})
 	}
 }
-
 func EmployeeList(c *gin.Context) {
 	resp, err := models.SearchEmployees(c.Query("id"), c.Query("status"))
 	if err != nil {
@@ -113,7 +140,6 @@ func EmployeeList(c *gin.Context) {
 		})
 	}
 }
-
 func EmployeeDelete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -152,7 +178,6 @@ func EmployeeDelete(c *gin.Context) {
 		})
 	}
 }
-
 func ValidateLogin(c *gin.Context) {
 	var login models.Employee
 	err := c.ShouldBindJSON(&login)

@@ -1,14 +1,21 @@
 package Customer
 
 import (
+	"encoding/json"
 	"strconv"
 
+	key "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	Models "github.com/Lucasmartinsn/grocery-api/Models/Customer"
 	Employee "github.com/Lucasmartinsn/grocery-api/Models/Employee"
+	descrypt "github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionToken"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+var requestData struct {
+	Data string `json:"data"`
+}
 
 func LoginCustomer(c *gin.Context) {
 	var login Models.Customer
@@ -92,16 +99,30 @@ func CustomerCreate(c *gin.Context) {
 		}
 	}
 	if params["customer"] {
-		var data Models.Customer
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		id, err := Models.CreationCustomer(data)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data Models.Customer
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		if id, err := Models.CreationCustomer(data); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error when trying to insert",
@@ -115,11 +136,26 @@ func CustomerCreate(c *gin.Context) {
 			return
 		}
 	} else if params["address"] {
-		var data Models.Address
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
+			})
+			return
+		}
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data Models.Address
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
 			})
 			return
 		}
@@ -136,11 +172,26 @@ func CustomerCreate(c *gin.Context) {
 			return
 		}
 	} else if params["card"] {
-		var data Models.Credit_card
-		if err := c.ShouldBindJSON(&data); err != nil {
+		if err := c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
+			})
+			return
+		}
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var data Models.Credit_card
+		if err = json.Unmarshal([]byte(decryptedData), &data); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
 			})
 			return
 		}
@@ -176,15 +227,12 @@ func CustomerList(c *gin.Context) {
 	}
 }
 func CustomerListAddress(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
+	if id, err := uuid.Parse(c.Param("id")); err != nil {
 		c.JSON(400, gin.H{
 			"Error": err.Error(),
 		})
 		return
-	}
-	resp, err := Models.SearchCustomer_address(id)
-	if err != nil {
+	} else if resp, err := Models.SearchCustomer_address(id); err != nil {
 		c.JSON(400, gin.H{
 			"Error": err.Error(),
 		})
@@ -201,8 +249,7 @@ func CustomerListCard(c *gin.Context) {
 		})
 		return
 	}
-	resp, err := Models.SearchCustomer_card(id)
-	if err != nil {
+	if resp, err := Models.SearchCustomer_card(id); err != nil {
 		c.JSON(400, gin.H{
 			"Error": err.Error(),
 		})
@@ -225,7 +272,6 @@ func CustomerUpdate(c *gin.Context) {
 	for _, key := range keys {
 		params[key] = false
 	}
-
 	for _, key := range keys {
 		valueStr := c.Query(key)
 		if valueStr != "" {
@@ -238,23 +284,36 @@ func CustomerUpdate(c *gin.Context) {
 		}
 	}
 	if params["customer"] {
-		var customer Models.Customer
-		if err = c.ShouldBindJSON(&customer); err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		row, err := Models.UpdatedCustomer(id, customer, params["pass"])
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var customer Models.Customer
+		if err = json.Unmarshal([]byte(decryptedData), &customer); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		if row, err := Models.UpdatedCustomer(id, customer, params["pass"]); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})
@@ -266,23 +325,37 @@ func CustomerUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["address"] {
-		var address Models.Address
-		if err = c.ShouldBindJSON(&address); err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		row, err := Models.UpdatedCustomer_address(id, address)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var address Models.Address
+		if err = json.Unmarshal([]byte(decryptedData), &address); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+
+		if row, err := Models.UpdatedCustomer_address(id, address); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})
@@ -294,23 +367,36 @@ func CustomerUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["card"] {
-		var card Models.Credit_card
-		if err = c.ShouldBindJSON(&card); err != nil {
+		if err = c.ShouldBindJSON(&requestData); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decoding json",
 			})
 			return
 		}
-		row, err := Models.UpdatedCustomer_card(id, card)
+		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 		if err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decrypting data",
+			})
+			return
+		}
+		var card Models.Credit_card
+		if err = json.Unmarshal([]byte(decryptedData), &card); err != nil {
+			c.JSON(400, gin.H{
+				"Error":   err.Error(),
+				"Message": "error decoding decrypted json",
+			})
+			return
+		}
+		if row, err := Models.UpdatedCustomer_card(id, card); err != nil {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error updating register",
 			})
 			return
-		}
-		if row != 1 {
+		} else if row != 1 {
 			c.JSON(500, gin.H{
 				"Error": "internal database error",
 			})
@@ -337,15 +423,13 @@ func CustomerDelete(c *gin.Context) {
 		})
 		return
 	}
-	row, err := Models.DeleteCustumer(id)
-	if err != nil {
+	if row, err := Models.DeleteCustumer(id); err != nil {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error deleted register",
 		})
 		return
-	}
-	if row == 0 {
+	} else if row == 0 {
 		c.JSON(500, gin.H{
 			"Error": "internal database error",
 		})
