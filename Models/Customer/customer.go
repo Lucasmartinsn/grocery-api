@@ -2,13 +2,24 @@ package Customer
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 
+	confDB "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	"github.com/Lucasmartinsn/grocery-api/Database"
 	Type "github.com/Lucasmartinsn/grocery-api/Models/Employee"
 	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionPass"
+	"github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	"github.com/google/uuid"
 )
+
+func convert(v any) (string, error) {
+	jsonData, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), err
+}
 
 func ValidateEmployee(cpf int, senha string) (employee Type.Employee, err error) {
 	conn, err := Database.OpenConnection()
@@ -96,10 +107,10 @@ func CreationCard(card Credit_card) (err error) {
 	err = conn.QueryRow(sql, &card.Customer_id, &card.Number, &card.Csv, &card.NameCard, &card.Validity).Err()
 	return
 }
-func SearchCustomer(ids string) ([]Customer, error) {
+func SearchCustomer(ids string) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer conn.Close()
 	// Resquest: http://localhost:5000/api/customer/?id=21331
@@ -107,15 +118,21 @@ func SearchCustomer(ids string) ([]Customer, error) {
 		var customer Customer
 		row := conn.QueryRow(`SELECT id, name, email, contact, cpf, creation_date FROM t_customer WHERE id=$1`, id)
 		err = row.Scan(&customer.Id, &customer.Name, &customer.Email, &customer.Contact, &customer.Cpf, &customer.CreationDate)
-
-		return []Customer{customer}, err
+		if err != nil {
+			return "", err
+		}
+		data, err := convert(customer)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 
 	} else {
 		// Resquest: http://localhost:5000/api/customer/
 		var customer []Customer
 		rows, err := conn.Query(`SELECT id, name, email, contact, cpf, creation_date FROM t_customer`)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		for rows.Next() {
@@ -127,13 +144,17 @@ func SearchCustomer(ids string) ([]Customer, error) {
 			}
 			customer = append(customer, newcustomer)
 		}
-		return customer, err
+		data, err := convert(customer)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 	}
 }
-func SearchCustomer_address(id uuid.UUID) (s_address C_Address, err error) {
+func SearchCustomer_address(id uuid.UUID) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer conn.Close()
 
@@ -142,12 +163,12 @@ func SearchCustomer_address(id uuid.UUID) (s_address C_Address, err error) {
 	row := conn.QueryRow(`SELECT id, name, email, contact, cpf, creation_date FROM t_customer WHERE id=$1`, id)
 	err = row.Scan(&customer.Id, &customer.Name, &customer.Email, &customer.Contact, &customer.Cpf, &customer.CreationDate)
 	if err != nil {
-		return
+		return "", err
 	}
 	var address []Address
 	rows, err := conn.Query(`SELECT * FROM t_address WHERE customer_id=$1`, id)
 	if err != nil {
-		return
+		return "", err
 	}
 	for rows.Next() {
 		var newaddress Address
@@ -157,16 +178,20 @@ func SearchCustomer_address(id uuid.UUID) (s_address C_Address, err error) {
 		}
 		address = append(address, newaddress)
 	}
-	s_address = C_Address{
+	s_address := C_Address{
 		Customer: customer,
 		Address:  address,
 	}
-	return s_address, err
+	data, err := convert(s_address)
+	if err != nil {
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
-func SearchCustomer_card(id uuid.UUID) (s_card C_Card, err error) {
+func SearchCustomer_card(id uuid.UUID) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer conn.Close()
 
@@ -175,12 +200,12 @@ func SearchCustomer_card(id uuid.UUID) (s_card C_Card, err error) {
 	row := conn.QueryRow(`SELECT id, name, email, contact, cpf, creation_date FROM t_customer WHERE id=$1`, id)
 	err = row.Scan(&customer.Id, &customer.Name, &customer.Email, &customer.Contact, &customer.Cpf, &customer.CreationDate)
 	if err != nil {
-		return
+		return "", err
 	}
 	var card []Credit_card
 	rows, err := conn.Query(`SELECT * FROM t_credit_card WHERE customer_id=$1`, id)
 	if err != nil {
-		return
+		return "", err
 	}
 	for rows.Next() {
 		var newcard Credit_card
@@ -190,11 +215,15 @@ func SearchCustomer_card(id uuid.UUID) (s_card C_Card, err error) {
 		}
 		card = append(card, newcard)
 	}
-	s_card = C_Card{
+	s_card := C_Card{
 		Customer: customer,
 		Cards:    card,
 	}
-	return s_card, err
+	data, err := convert(s_card)
+	if err != nil {
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
 func UpdatedCustomer(id uuid.UUID, customer Customer, p bool) (int64, error) {
 	conn, err := Database.OpenConnection()

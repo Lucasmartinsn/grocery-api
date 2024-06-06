@@ -2,11 +2,14 @@ package Employee
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"strconv"
 
+	confDB "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	"github.com/Lucasmartinsn/grocery-api/Database"
 	Services "github.com/Lucasmartinsn/grocery-api/Services/EncryptionPass"
+	"github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	"github.com/google/uuid"
 )
 
@@ -14,11 +17,18 @@ func isUUIDEmpty(u uuid.UUID) bool {
 	// uuid.Nil == Null
 	return u == uuid.Nil
 }
+func convert(v any) (string, error) {
+	jsonData, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), err
+}
 
-func SearchEmployees(i, s string) ([]Employee, error) {
+func SearchEmployees(i, s string) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer conn.Close()
 
@@ -29,7 +39,7 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		var employee []Employee
 		rows, err := conn.Query(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee`)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		for rows.Next() {
 			var newemployees Employee
@@ -40,7 +50,11 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 			}
 			employee = append(employee, newemployees)
 		}
-		return employee, err
+		data, err := convert(employee)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 
 	} else if !isUUIDEmpty(id) && s == "" {
 		// Get One
@@ -48,8 +62,14 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		var employee Employee
 		row := conn.QueryRow(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE id=$1`, id)
 		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
-
-		return []Employee{employee}, err
+		if err != nil {
+			return "", err
+		}
+		data, err := convert(employee)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 
 	} else if i == "" && s != "" {
 		// Get all when tag !empty
@@ -57,7 +77,7 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		var employee []Employee
 		rows, err := conn.Query(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE active=$1`, status)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		for rows.Next() {
 			var newemployees Employee
@@ -68,7 +88,11 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 			}
 			employee = append(employee, newemployees)
 		}
-		return employee, err
+		data, err := convert(employee)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 
 	} else if i != "" && s != "" {
 		// 	// Get One
@@ -76,11 +100,21 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		var employee Employee
 		row := conn.QueryRow(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE id=$1 and active=$2`, id, status)
 		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
-
-		return []Employee{employee}, err
+		if err != nil {
+			return "", err
+		}
+		data, err := convert(employee)
+		if err != nil {
+			return "", err
+		}
+		return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 	}
 
-	return []Employee{}, errors.New("no conditions met")
+	data, err := convert([]Employee{})
+	if err != nil {
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
 
 func UpdateEmployee(id uuid.UUID, option map[string]bool, employee Employee) (int64, error) {

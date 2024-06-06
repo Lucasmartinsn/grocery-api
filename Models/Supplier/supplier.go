@@ -3,6 +3,7 @@ package Supplier
 import (
 	"encoding/json"
 
+	confDB "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	"github.com/Lucasmartinsn/grocery-api/Database"
 	"github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	"github.com/google/uuid"
@@ -53,8 +54,6 @@ func CreationBatch(batch Batch) (err error) {
 	err = conn.QueryRow(sql, &batch.Supplier_id, &batch.Volume, &batch.Price, &batch.DeliveryDate).Err()
 	return
 }
-
-// func SearchSupplier() (supplier []Supplier, err error) {
 func SearchSupplier() (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -77,12 +76,15 @@ func SearchSupplier() (string, error) {
 		supplier = append(supplier, newsupplier)
 	}
 	data, err := convert(supplier)
-	return EncryptionResponse.EncryptData(data, []byte(Database.Variavel()))
+	if err != nil{
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
-func SearchSupplier_product(id uuid.UUID) (s_product S_product, err error) {
+func SearchSupplier_product(id uuid.UUID) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer conn.Close()
 
@@ -91,12 +93,12 @@ func SearchSupplier_product(id uuid.UUID) (s_product S_product, err error) {
 	row := conn.QueryRow(`SELECT * FROM t_supplier WHERE id=$1`, id)
 	err = row.Scan(&supplier.Id, &supplier.Name, &supplier.Cnpj, &supplier.Contract_number, &supplier.CompanyName, &supplier.Status)
 	if err != nil {
-		return
+		return "", err
 	}
 	var product []Product
 	rows, err := conn.Query(`SELECT * FROM t_product WHERE supplier_id=$1`, id)
 	if err != nil {
-		return
+		return "", err
 	}
 	for rows.Next() {
 		var newproduct Product
@@ -106,16 +108,20 @@ func SearchSupplier_product(id uuid.UUID) (s_product S_product, err error) {
 		}
 		product = append(product, newproduct)
 	}
-	s_product = S_product{
+	s_product := S_product{
 		Supplier: supplier,
 		Products: product,
 	}
-	return s_product, err
+	data, err := convert(s_product)
+	if err != nil{
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
-func SearchSupplier_bacth(id uuid.UUID) (s_batch S_batch, err error) {
+func SearchSupplier_bacth(id uuid.UUID) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer conn.Close()
 
@@ -124,12 +130,12 @@ func SearchSupplier_bacth(id uuid.UUID) (s_batch S_batch, err error) {
 	row := conn.QueryRow(`SELECT * FROM t_supplier WHERE id=$1`, id)
 	err = row.Scan(&supplier.Id, &supplier.Name, &supplier.Cnpj, &supplier.Contract_number, &supplier.CompanyName, &supplier.Status)
 	if err != nil {
-		return
+		return "", err
 	}
 	var batch []Batch
 	rows, err := conn.Query(`SELECT * FROM t_batch WHERE supplier_id=$1`, id)
 	if err != nil {
-		return
+		return "", err
 	}
 	for rows.Next() {
 		var newbatch Batch
@@ -139,12 +145,17 @@ func SearchSupplier_bacth(id uuid.UUID) (s_batch S_batch, err error) {
 		}
 		batch = append(batch, newbatch)
 	}
-	s_batch = S_batch{
+	s_batch := S_batch{
 		Supplier: supplier,
 		Batchs:   batch,
 	}
-	return s_batch, err
+	data, err := convert(s_batch)
+	if err != nil{
+		return "", err
+	}
+	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
+
 func UpdatedSupplier(id uuid.UUID, supplier Supplier) (int64, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
