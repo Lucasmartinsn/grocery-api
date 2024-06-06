@@ -25,5 +25,6 @@ JWT_SECRET_KEY_DEFAULT=
 JWT_ISSUER_DEFAULT=
 
 
-# Configure the cryptographic key AES. The key must 32 bytes
-AES_SECRET_KEY=A0lWc&|=p8zMzW>U1-j%$48auQa1U5T&ç6 # not used
+# Configure the AES cryptographic key. The key must be 32 bytes and contain only numbers
+# AES_SECRET_KEY=80812360294092360966433904205100
+AES_SECRET_KEY=

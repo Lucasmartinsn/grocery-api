@@ -1,9 +1,20 @@
 package Supplier
 
 import (
+	"encoding/json"
+
 	"github.com/Lucasmartinsn/grocery-api/Database"
+	"github.com/Lucasmartinsn/grocery-api/Services/EncryptionResponse"
 	"github.com/google/uuid"
 )
+
+func convert(v any) (string, error) {
+	jsonData, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), err
+}
 
 func CreationSupplier(supplier Supplier) (err error) {
 	conn, err := Database.OpenConnection()
@@ -42,17 +53,20 @@ func CreationBatch(batch Batch) (err error) {
 	err = conn.QueryRow(sql, &batch.Supplier_id, &batch.Volume, &batch.Price, &batch.DeliveryDate).Err()
 	return
 }
-func SearchSupplier() (supplier []Supplier, err error) {
+
+// func SearchSupplier() (supplier []Supplier, err error) {
+func SearchSupplier() (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
-		return
+		return "", err
 	}
 	defer conn.Close()
 	// Resquest: http://localhost:5000/api/supplier/
 	rows, err := conn.Query(`SELECT * FROM t_supplier`)
 	if err != nil {
-		return
+		return "", err
 	}
+	var supplier []Supplier
 	for rows.Next() {
 		var newsupplier Supplier
 		err = rows.Scan(&newsupplier.Id, &newsupplier.Name, &newsupplier.Cnpj, &newsupplier.Contract_number,
@@ -62,7 +76,8 @@ func SearchSupplier() (supplier []Supplier, err error) {
 		}
 		supplier = append(supplier, newsupplier)
 	}
-	return
+	data, err := convert(supplier)
+	return EncryptionResponse.EncryptData(data, []byte(Database.Variavel()))
 }
 func SearchSupplier_product(id uuid.UUID) (s_product S_product, err error) {
 	conn, err := Database.OpenConnection()

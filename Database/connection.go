@@ -32,6 +32,10 @@ func connectionType() (driver, sc string) {
 	}
 	return
 }
+func Variavel() (string) {
+	env := Configs.GetENV()
+	return env.Env
+}
 
 func OpenConnection() (*sql.DB, error) {
 	driver, sc := connectionType()

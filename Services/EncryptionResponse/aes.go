@@ -1,40 +1,66 @@
-package Encryptionresponse
+package EncryptionResponse
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/hex"
-	"os"
+	"crypto/rand"
+	"encoding/base64"
 )
 
-func Encrypt(text string) (string, error) {
-	key := []byte(os.Getenv("AES_SECRET_KEY"))
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	plaintext := []byte(text)
-	cfb := cipher.NewCFBEncrypter(block, key[:block.BlockSize()])
-	ciphertext := make([]byte, len(plaintext))
-	cfb.XORKeyStream(ciphertext, plaintext)
-	return hex.EncodeToString(ciphertext), nil
+func pkcs7Pad(data []byte, blockSize int) []byte {
+	padding := blockSize - len(data)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(data, padtext...)
 }
 
-func Decrypt(cryptoText string) (string, error) {
-	key := []byte(os.Getenv("AES_SECRET_KEY"))
+// Função para criptografar os dados
+func EncryptData(data string, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
 
-	ciphertext, err := hex.DecodeString(cryptoText)
+	iv := make([]byte, aes.BlockSize)
+	if _, err := rand.Read(iv); err != nil {
+		return "", err
+	}
+
+	mode := cipher.NewCBCEncrypter(block, iv)
+	paddedData := pkcs7Pad([]byte(data), aes.BlockSize)
+	encrypted := make([]byte, len(paddedData))
+	mode.CryptBlocks(encrypted, paddedData)
+
+	// Concatenar IV com os dados criptografados e codificar em Base64
+	encryptedData := base64.StdEncoding.EncodeToString(append(iv, encrypted...))
+	return encryptedData, nil
+}
+func pkcs7Unpad(data []byte) []byte {
+	length := len(data)
+	unpadding := int(data[length-1])
+	return data[:(length - unpadding)]
+}
+
+func DecryptData(encryptedData string, key []byte) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(encryptedData)
 	if err != nil {
 		return "", err
 	}
 
-	cfb := cipher.NewCFBDecrypter(block, key[:block.BlockSize()])
-	plaintext := make([]byte, len(ciphertext))
-	cfb.XORKeyStream(plaintext, ciphertext)
-	return string(plaintext), nil
+	iv := data[:aes.BlockSize]
+	ciphertext := data[aes.BlockSize:]
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	decrypted := make([]byte, len(ciphertext))
+	mode.CryptBlocks(decrypted, ciphertext)
+
+	// Remover o padding PKCS7
+	decrypted = pkcs7Unpad(decrypted)
+
+	return string(decrypted), nil
 }

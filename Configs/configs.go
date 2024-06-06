@@ -22,8 +22,23 @@ type DBConfigPostgres struct {
 	Database string
 	Driver   string
 }
+// 
+var cfEnv *configEnv
+
+type configEnv struct {
+	Env EncConf
+}
+
+type EncConf struct {
+	Env string
+}
 
 func init() {
+	// Loading the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("error loading package godoenv: %v", err)
+	}
 	ginMode := os.Getenv("GIN_MODE")
 	switch ginMode {
 	case "release":
@@ -35,7 +50,22 @@ func init() {
 	}
 }
 
-func Load() error {
+func loadEnv() error {
+	// Loading the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("error loading package godoenv: %v", err)
+	}
+
+	cfEnv = new(configEnv)
+
+	cfEnv.Env = EncConf{
+		Env: os.Getenv("AES_SECRET_KEY"),
+	}
+	return nil
+}
+
+func loadDB() error {
 	// Loading the .env file
 	err := godotenv.Load()
 	if err != nil {
@@ -43,7 +73,7 @@ func Load() error {
 	}
 
 	cfg = new(configPostgres)
-
+	
 	// fetches values ​​from .env file
 	cfg.DB = DBConfigPostgres{
 		Host:     os.Getenv("DATABASES_HOST"),
@@ -57,7 +87,21 @@ func Load() error {
 	return nil
 }
 
+func Load() error {
+	if errdb := loadDB(); errdb != nil {
+		return errdb
+	}else if  errev := loadEnv(); errev != nil {
+		return errev
+	}else {
+		return nil
+	}
+}
 // Returns the struct with values ​​for Database Connection
 func GetDB() DBConfigPostgres {
 	return cfg.DB
+}
+
+// Returns the struct with values ​​for key Connection
+func GetENV() EncConf {
+	return cfEnv.Env
 }

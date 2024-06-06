@@ -10,7 +10,7 @@ import (
 func main() {
 	err := configs.Load()
 	if err != nil {
-		log.Fatalf("error loading .env file: %v", err)
+		log.Fatalf("error loading Server: %v", err)
 	}
 
 	server := Server.NewServer()
