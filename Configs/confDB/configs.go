@@ -1,9 +1,10 @@
-package Configs
+package confDB
 
 import (
 	"log"
 	"os"
 
+	load "github.com/Lucasmartinsn/grocery-api/Configs/confEnv"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -21,16 +22,6 @@ type DBConfigPostgres struct {
 	Pass     string
 	Database string
 	Driver   string
-}
-// 
-var cfEnv *configEnv
-
-type configEnv struct {
-	Env EncConf
-}
-
-type EncConf struct {
-	Env string
 }
 
 func init() {
@@ -50,21 +41,6 @@ func init() {
 	}
 }
 
-func loadEnv() error {
-	// Loading the .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("error loading package godoenv: %v", err)
-	}
-
-	cfEnv = new(configEnv)
-
-	cfEnv.Env = EncConf{
-		Env: os.Getenv("AES_SECRET_KEY"),
-	}
-	return nil
-}
-
 func loadDB() error {
 	// Loading the .env file
 	err := godotenv.Load()
@@ -73,7 +49,7 @@ func loadDB() error {
 	}
 
 	cfg = new(configPostgres)
-	
+
 	// fetches values ​​from .env file
 	cfg.DB = DBConfigPostgres{
 		Host:     os.Getenv("DATABASES_HOST"),
@@ -90,18 +66,14 @@ func loadDB() error {
 func Load() error {
 	if errdb := loadDB(); errdb != nil {
 		return errdb
-	}else if  errev := loadEnv(); errev != nil {
+	} else if errev := load.LoadEnv(); errev != nil {
 		return errev
-	}else {
+	} else {
 		return nil
 	}
 }
+
 // Returns the struct with values ​​for Database Connection
 func GetDB() DBConfigPostgres {
 	return cfg.DB
-}
-
-// Returns the struct with values ​​for key Connection
-func GetENV() EncConf {
-	return cfEnv.Env
 }

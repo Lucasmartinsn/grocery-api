@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	configs "github.com/Lucasmartinsn/grocery-api/Configs"
+	configs "github.com/Lucasmartinsn/grocery-api/Configs/confDB"
 	"github.com/Lucasmartinsn/grocery-api/Server"
 )
 
