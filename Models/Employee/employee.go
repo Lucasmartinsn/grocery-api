@@ -27,7 +27,7 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 	if i == "" && s == "" {
 		// Resquest: http://localhost:5000/api/employee/
 		var employee []Employee
-		rows, err := conn.Query(`SELECT * FROM t_employee`)
+		rows, err := conn.Query(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee`)
 		if err != nil {
 			return nil, err
 		}
@@ -46,8 +46,8 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		// Get One
 		// Resquest: http://localhost:5000/api/employee/?id=2342
 		var employee Employee
-		row := conn.QueryRow(`SELECT * FROM t_employee WHERE id=$1`, id)
-		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Password, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
+		row := conn.QueryRow(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE id=$1`, id)
+		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
 
 		return []Employee{employee}, err
 
@@ -55,13 +55,13 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		// Get all when tag !empty
 		// Resquest: http://localhost:5000/api/employee/?status=true
 		var employee []Employee
-		rows, err := conn.Query(`SELECT * FROM t_employee WHERE active=$1`, status)
+		rows, err := conn.Query(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE active=$1`, status)
 		if err != nil {
 			return nil, err
 		}
 		for rows.Next() {
 			var newemployees Employee
-			err = rows.Scan(&newemployees.Id, &newemployees.Name, &newemployees.Cpf, &newemployees.Password, &newemployees.Office,
+			err = rows.Scan(&newemployees.Id, &newemployees.Name, &newemployees.Cpf, &newemployees.Office,
 				&newemployees.Active, &newemployees.Admin, &newemployees.CreationDate)
 			if err != nil {
 				continue
@@ -74,8 +74,8 @@ func SearchEmployees(i, s string) ([]Employee, error) {
 		// 	// Get One
 		// Resquest: http://localhost:5000/api/employee/?id=2342&status=true
 		var employee Employee
-		row := conn.QueryRow(`SELECT * FROM t_employee WHERE id=$1 and active=$2`, id, status)
-		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Password, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
+		row := conn.QueryRow(`SELECT id, name, cpf, office, active, admin, creation_date FROM t_employee WHERE id=$1 and active=$2`, id, status)
+		err := row.Scan(&employee.Id, &employee.Name, &employee.Cpf, &employee.Office, &employee.Active, &employee.Admin, &employee.CreationDate)
 
 		return []Employee{employee}, err
 	}
