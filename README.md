@@ -35,24 +35,25 @@ example of using the client-side encryption key in a React application
 ### Requirements
 * Framework React 
     * required packages
-        *  axios 
         *  crypto-js
         *  dotenv
 
 * Example file .js
-    ```json
+    ```javascript
+        // ./Encrypt.js
         import CryptoJS from 'crypto-js';
+        // returns the value of the .env environment variable
         const key = CryptoJS.enc.Utf8.parse(process.env.REACT_APP_API_KEY);
 
         export function DecryptData(encryptedData) {
-            // Decodificar a string Base64 para bytes
+            // Decode Base64 string to bytes
             const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData);
 
-            // Separar o IV dos bytes criptografados
+            // Separate the IV from the encrypted bytes
             const iv = CryptoJS.lib.WordArray.create(encryptedBytes.words.  slice(0, 4), 16);
             const ciphertext = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(4), encryptedBytes.sigBytes - 16);
 
-        // Descriptografar usando a chave e o IV
+        // Decrypt using key and IV
         const decrypted = CryptoJS.AES.decrypt(
                 { ciphertext: ciphertext },
                 key,
@@ -63,7 +64,7 @@ example of using the client-side encryption key in a React application
                 }
             );
 
-            // Retornar os dados descriptografados como texto UTF-8
+            // Return decrypted data as UTF-8 text
             return JSON.parse(CryptoJS.enc.Utf8.stringify(decrypted));
         };
 
@@ -75,7 +76,7 @@ example of using the client-side encryption key in a React application
                 padding: CryptoJS.pad.Pkcs7
             });
 
-            // Retornando IV e dados criptografados concatenados
+            // Returning IV and concatenated encrypted data
         return iv.concat(encrypted.ciphertext).toString(CryptoJS.enc.Base64);
         };
     ```
