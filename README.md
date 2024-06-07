@@ -15,6 +15,74 @@ The API will manage the basic functionalities of a supermarket.
     Authorization: Bearer jhkhkjhkjhkjcxbnc....
     Content-Type: application/json
     ```
+* Data exchange between server and client must be encrypted. Where AES encryption is used
+    * Example of sending and receiving
+        * Sending
+            ```json
+            {
+                "data": "sjdgdfjgkldvbmxbmnvbuioeg...",
+            }
+            ```
+        * Receiving
+        * Upon receiving data, the name of the ‘data’ key will change according to the route being called
+            ```json
+            {
+                "data": "sjdgdfjgkldvbmxbmnvbuioeg...",
+            }
+            ```
+## Client-side usage
+example of using the client-side encryption key in a React application
+### Requirements
+* Framework React 
+    * required packages
+        *  axios 
+        *  crypto-js
+        *  dotenv
+
+* Example file .js
+    ```json
+        import CryptoJS from 'crypto-js';
+        const key = CryptoJS.enc.Utf8.parse(process.env.REACT_APP_API_KEY);
+
+        export function DecryptData(encryptedData) {
+            // Decodificar a string Base64 para bytes
+            const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData);
+
+            // Separar o IV dos bytes criptografados
+            const iv = CryptoJS.lib.WordArray.create(encryptedBytes.words.  slice(0, 4), 16);
+            const ciphertext = CryptoJS.lib.WordArray.create(encryptedBytes.words.slice(4), encryptedBytes.sigBytes - 16);
+
+        // Descriptografar usando a chave e o IV
+        const decrypted = CryptoJS.AES.decrypt(
+                { ciphertext: ciphertext },
+                key,
+                {
+                    iv: iv,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                }
+            );
+
+            // Retornar os dados descriptografados como texto UTF-8
+            return JSON.parse(CryptoJS.enc.Utf8.stringify(decrypted));
+        };
+
+        export function EncryptData(data) {
+            const iv = CryptoJS.lib.WordArray.random(16);  // Gerando IV (Initialization Vector) aleatório
+            const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            // Retornando IV e dados criptografados concatenados
+        return iv.concat(encrypted.ciphertext).toString(CryptoJS.enc.Base64);
+        };
+    ```
+
+
+## Routes
+Here you will see all the routes available for use in the app.
 ### Employee  
 ``Login employee ``
 
