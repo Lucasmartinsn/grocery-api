@@ -20,7 +20,6 @@ func convert(v any) (string, error) {
 	}
 	return string(jsonData), err
 }
-
 func ValidateEmployee(cpf int, senha string) (employee Type.Employee, err error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -32,7 +31,7 @@ func ValidateEmployee(cpf int, senha string) (employee Type.Employee, err error)
 	err = conn.QueryRow(query, cpf).Scan(&employee.Id, &employee.Password, &employee.Active)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = errors.New("user does not exist")
+			err = errors.New("incorrect username or password")
 		}
 		return
 	}
@@ -57,7 +56,7 @@ func ValidateCustomer(cpf int, senha string) (customer Customer, err error) {
 	err = conn.QueryRow(query, cpf).Scan(&customer.Id, &customer.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = errors.New("user does not exist")
+			err = errors.New("incorrect username or password")
 		}
 		return
 	}

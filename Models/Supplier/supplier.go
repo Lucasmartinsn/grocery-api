@@ -16,7 +16,6 @@ func convert(v any) (string, error) {
 	}
 	return string(jsonData), err
 }
-
 func CreationSupplier(supplier Supplier) (err error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -155,7 +154,6 @@ func SearchSupplier_bacth(id uuid.UUID) (string, error) {
 	}
 	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
-
 func UpdatedSupplier(id uuid.UUID, supplier Supplier) (int64, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {

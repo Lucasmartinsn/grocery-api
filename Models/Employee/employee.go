@@ -24,7 +24,6 @@ func convert(v any) (string, error) {
 	}
 	return string(jsonData), err
 }
-
 func SearchEmployees(i, s string) (string, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -116,7 +115,6 @@ func SearchEmployees(i, s string) (string, error) {
 	}
 	return EncryptionResponse.EncryptData(data, []byte(confDB.Variable()))
 }
-
 func UpdateEmployee(id uuid.UUID, option map[string]bool, employee Employee) (int64, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -176,7 +174,6 @@ func UpdateEmployee(id uuid.UUID, option map[string]bool, employee Employee) (in
 	}
 	return 404, err
 }
-
 func DeleteEmployee(id uuid.UUID) (int64, error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -203,7 +200,6 @@ func DeleteEmployee(id uuid.UUID) (int64, error) {
 		return 404, err
 	}
 }
-
 func CreationEmployee(employee Employee) (err error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -218,7 +214,6 @@ func CreationEmployee(employee Employee) (err error) {
 	err = conn.QueryRow(sql, &employee.Name, &employee.Cpf, password, &employee.Office, &employee.Active, &employee.Admin).Err()
 	return
 }
-
 func Validate(cpf int, senha string) (employee Employee, err error) {
 	conn, err := Database.OpenConnection()
 	if err != nil {
@@ -230,7 +225,7 @@ func Validate(cpf int, senha string) (employee Employee, err error) {
 	err = conn.QueryRow(query, cpf).Scan(&employee.Id, &employee.Password, &employee.Active)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = errors.New("user does not exist")
+			err = errors.New("incorrect username or password")
 		}
 		return
 	}
