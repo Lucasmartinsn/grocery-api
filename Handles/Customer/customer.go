@@ -17,6 +17,16 @@ var requestData struct {
 	Data string `json:"data"`
 }
 
+func descrypts(c *gin.Context) (string, error) {
+	if err := c.ShouldBindJSON(&requestData); err != nil {
+		return "", err
+	}
+	decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
+	if err != nil {
+		return "", err
+	}
+	return decryptedData, nil
+}
 func LoginCustomer(c *gin.Context) {
 	var login Models.Customer
 	err := c.ShouldBindJSON(&login)
@@ -27,7 +37,6 @@ func LoginCustomer(c *gin.Context) {
 		})
 		return
 	}
-
 	register, err := Models.ValidateCustomer(login.Cpf, login.Password)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -35,7 +44,6 @@ func LoginCustomer(c *gin.Context) {
 		})
 		return
 	}
-
 	token, err := Services.NewJWTService_Customer().GenerateToken_Customer(register.Id)
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -59,7 +67,6 @@ func LoginEmployee(c *gin.Context) {
 		})
 		return
 	}
-
 	register, err := Employee.Validate(login.Cpf, login.Password)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -67,7 +74,6 @@ func LoginEmployee(c *gin.Context) {
 		})
 		return
 	}
-
 	token, err := Services.NewJWTService_Customer().GenerateToken_Customer(register.Id)
 	if err != nil {
 		c.JSON(500, gin.H{
@@ -99,15 +105,8 @@ func CustomerCreate(c *gin.Context) {
 		}
 	}
 	if params["customer"] {
-		if err := c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",
@@ -136,15 +135,8 @@ func CustomerCreate(c *gin.Context) {
 			return
 		}
 	} else if params["address"] {
-		if err := c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",
@@ -172,15 +164,8 @@ func CustomerCreate(c *gin.Context) {
 			return
 		}
 	} else if params["card"] {
-		if err := c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",
@@ -284,15 +269,8 @@ func CustomerUpdate(c *gin.Context) {
 		}
 	}
 	if params["customer"] {
-		if err = c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",
@@ -325,15 +303,8 @@ func CustomerUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["address"] {
-		if err = c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",
@@ -367,15 +338,8 @@ func CustomerUpdate(c *gin.Context) {
 			return
 		}
 	} else if params["card"] {
-		if err = c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(400, gin.H{
-				"Error":   err.Error(),
-				"Message": "error decoding json",
-			})
-			return
-		}
-		decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-		if err != nil {
+		decryptedData, err := descrypts(c)
+		if err != nil || decryptedData == "" {
 			c.JSON(400, gin.H{
 				"Error":   err.Error(),
 				"Message": "error decrypting data",

@@ -16,16 +16,19 @@ var requestData struct {
 	Data string `json:"data"`
 }
 
-func EmployeeCreate(c *gin.Context) {
+func descrypts(c *gin.Context) (string, error) {
 	if err := c.ShouldBindJSON(&requestData); err != nil {
-		c.JSON(400, gin.H{
-			"Error":   err.Error(),
-			"Message": "error decoding json",
-		})
-		return
+		return "", err
 	}
 	decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
 	if err != nil {
+		return "", err
+	}
+	return decryptedData, nil
+}
+func EmployeeCreate(c *gin.Context) {
+	decryptedData, err := descrypts(c)
+	if err != nil || decryptedData == "" {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error decrypting data",
@@ -78,15 +81,8 @@ func EmployeeUpdate(c *gin.Context) {
 			params[key] = valueBool
 		}
 	}
-	if err = c.ShouldBindJSON(&requestData); err != nil {
-		c.JSON(400, gin.H{
-			"Error":   err.Error(),
-			"Message": "error decoding json",
-		})
-		return
-	}
-	decryptedData, err := descrypt.DecryptData(requestData.Data, []byte(key.Variable()))
-	if err != nil {
+	decryptedData, err := descrypts(c)
+	if err != nil || decryptedData == "" {
 		c.JSON(400, gin.H{
 			"Error":   err.Error(),
 			"Message": "error decrypting data",
